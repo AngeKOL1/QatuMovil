@@ -2,7 +2,7 @@ name: qatu_movil
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -31,6 +31,32 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # HTTP
+  dio: ^5.4.0
+
+  # Almacenamiento seguro del JWT
+  flutter_secure_storage: ^9.0.0
+
+  # Mapa
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+
+  # WebSocket STOMP
+  stomp_dart_client: ^1.1.0
+
+  # GPS
+  geolocator: ^11.0.0
+
+  # Estado
+  provider: ^6.1.0 # o riverpod si prefieres
+
+  # Notificaciones FCM
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.0
+
+  # Utilidades
+  shared_preferences: ^2.2.0
+  intl: ^0.19.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -51,7 +77,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
