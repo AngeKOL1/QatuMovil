@@ -42,7 +42,7 @@ dependencies:
   latlong2: ^0.9.0
 
   # WebSocket STOMP
-  stomp_dart_client: ^1.1.0
+  stomp_dart_client: ^3.0.1
 
   # GPS
   geolocator: ^11.0.0
