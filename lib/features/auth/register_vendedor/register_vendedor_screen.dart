@@ -39,7 +39,7 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
   ];
 
   String _formatTime(TimeOfDay t) =>
-      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:00';
 
   Future<void> _selectTime(bool isInicio) async {
     final picked = await showTimePicker(
@@ -138,8 +138,9 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
                 'Contraseña',
                 Icons.lock_outline,
                 obscure: true,
+                // Validación contraseña — mínimo 8 no 6
                 validator: (v) =>
-                    (v?.length ?? 0) < 6 ? 'Mínimo 6 caracteres' : null,
+                    (v?.length ?? 0) < 8 ? 'Mínimo 8 caracteres' : null,
               ),
               _field(
                 _dniCtrl,
@@ -153,6 +154,8 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
                 'Teléfono',
                 Icons.phone_outlined,
                 type: TextInputType.phone,
+                validator: (v) =>
+                    v?.length != 9 ? 'Teléfono de 9 dígitos' : null,
               ),
               const SizedBox(height: 16),
               _sectionTitle('Información del negocio'),

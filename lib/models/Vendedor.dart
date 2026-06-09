@@ -6,12 +6,11 @@ class VendedorRegisterRequest {
   final String password;
   final String dni;
   final String telefono;
-  final String descripcion;
-  final String tipoMovilidad; // FIJO | CARRITO | CAMIONETA
-  final String horarioInicio; // "07:00"
-  final String horarioFin;
-  final String
-  nombreCategoria; // COMIDA | ROPA | ELECTRONICA | SERVICIOS | OTROS
+  final String? descripcion;
+  final String tipoMovilidad;
+  final String horarioInicio; // "07:00:00"
+  final String horarioFin; // "18:00:00"
+  final String nombreCategoria;
 
   VendedorRegisterRequest({
     required this.nombre,
@@ -19,7 +18,7 @@ class VendedorRegisterRequest {
     required this.password,
     required this.dni,
     required this.telefono,
-    required this.descripcion,
+    this.descripcion,
     required this.tipoMovilidad,
     required this.horarioInicio,
     required this.horarioFin,
@@ -32,7 +31,7 @@ class VendedorRegisterRequest {
     'password': password,
     'dni': dni,
     'telefono': telefono,
-    'descripcion': descripcion,
+    if (descripcion != null) 'descripcion': descripcion,
     'tipoMovilidad': tipoMovilidad,
     'horarioInicio': horarioInicio,
     'horarioFin': horarioFin,

@@ -24,6 +24,7 @@ class _RegisterObservadorScreenState extends State<RegisterObservadorScreen> {
   final _telefonoCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _confirmPassCtrl = TextEditingController();
 
   @override
   void dispose() {
@@ -34,6 +35,7 @@ class _RegisterObservadorScreenState extends State<RegisterObservadorScreen> {
       _telefonoCtrl,
       _emailCtrl,
       _passCtrl,
+      _confirmPassCtrl,
     ]) {
       c.dispose();
     }
@@ -50,11 +52,11 @@ class _RegisterObservadorScreenState extends State<RegisterObservadorScreen> {
     final resp = await _authService.registerObservador(
       ObservadorRegisterRequest(
         nombre: _nombreCtrl.text.trim(),
-        apellidos: _apellidosCtrl.text.trim(),
         dni: _dniCtrl.text.trim(),
         telefono: _telefonoCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text,
+        confirmPassword: _confirmPassCtrl.text,
       ),
     );
 
@@ -122,6 +124,14 @@ class _RegisterObservadorScreenState extends State<RegisterObservadorScreen> {
                 obscure: true,
                 validator: (v) =>
                     (v?.length ?? 0) < 6 ? 'Mínimo 6 caracteres' : null,
+              ),
+              _field(
+                _confirmPassCtrl,
+                'Confirmar contraseña',
+                Icons.lock_outline,
+                obscure: true,
+                validator: (v) =>
+                    v != _passCtrl.text ? 'Las contraseñas no coinciden' : null,
               ),
               if (_error != null) ...[
                 const SizedBox(height: 16),

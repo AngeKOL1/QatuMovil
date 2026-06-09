@@ -1,26 +1,26 @@
 class ObservadorRegisterRequest {
   final String nombre;
-  final String apellidos;
   final String dni;
-  final String telefono;
   final String email;
+  final String telefono;
   final String password;
+  final String confirmPassword; // ← faltaba
 
   ObservadorRegisterRequest({
     required this.nombre,
-    required this.apellidos,
     required this.dni,
-    required this.telefono,
     required this.email,
+    required this.telefono,
     required this.password,
+    required this.confirmPassword,
   });
 
   Map<String, dynamic> toJson() => {
     'nombre': nombre,
-    'apellidos': apellidos,
     'dni': dni,
-    'telefono': telefono,
     'email': email,
+    'telefono': telefono,
     'password': password,
+    'confirmPassword': confirmPassword,
   };
 }

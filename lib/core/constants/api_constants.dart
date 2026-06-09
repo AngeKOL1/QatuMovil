@@ -1,5 +1,4 @@
 class ApiConstants {
-  // Emulador Android → 10.0.2.2
   // Dispositivo físico → IP de tu PC en la red local
   static const String baseUrl = 'http://192.168.100.27:6060/api';
   static const String wsUrl = 'ws://192.168.100.27:6060/ws/mapa-native';

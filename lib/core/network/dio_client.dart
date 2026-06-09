@@ -84,16 +84,28 @@ class DioClient {
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
         return NetworkException();
+
       case DioExceptionType.badResponse:
         final status = e.response?.statusCode;
         final body = e.response?.data;
-        final msg = body is Map
-            ? (body['message'] ?? body['error'] ?? 'Error $status')
-            : 'Error $status';
-        if (status == 401) return UnauthorizedException();
-        if (status == 404) return NotFoundException(msg.toString());
-        if (status == 422) return ValidationException(msg.toString());
-        return ServerException(msg.toString());
+
+        String msg = 'Error $status';
+
+        if (body is Map<String, dynamic>) {
+          msg =
+              body['detail']?.toString() ??
+              body['message']?.toString() ??
+              body['error']?.toString() ??
+              body['title']?.toString() ??
+              msg;
+        }
+
+        // if (status == 401) return UnauthorizedException(msg);
+        if (status == 404) return NotFoundException(msg);
+        if (status == 422) return ValidationException(msg);
+
+        return ServerException(msg);
+
       case DioExceptionType.connectionError:
         return NetworkException();
       default:
