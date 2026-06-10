@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qatu_movil/features/vendedor/vendedor_home_screen.dart';
 import '../../../core/core.dart';
 import '../../../models/models.dart';
 import '../../../services/Service.dart';
@@ -45,12 +46,16 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = false);
 
     if (resp.success) {
+      final rol = resp.data!.rol;
+      if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MapaScreen()),
+        MaterialPageRoute(
+          builder: (_) => rol == 'VENDEDOR'
+              ? const VendedorHomeScreen()
+              : const MapaScreen(),
+        ),
         (_) => false,
       );
-    } else {
-      setState(() => _error = resp.error);
     }
   }
 

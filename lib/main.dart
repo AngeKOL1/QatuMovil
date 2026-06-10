@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qatu_movil/features/vendedor/vendedor_home_screen.dart';
 import 'core/constants/app_colors.dart';
 import 'core/storage/secure_storage.dart';
 import 'features/auth/login/login_screen.dart';
@@ -80,9 +81,21 @@ class _SplashRouterState extends State<SplashRouter> {
     final hasSession = await storage.hasSession();
     if (!mounted) return;
 
+    if (!hasSession) {
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+
+    // Tiene sesión — leer el rol para redirigir correctamente
+    final rol = await storage.getRol();
+    if (!mounted) return;
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => hasSession ? const MapaScreen() : const LoginScreen(),
+        builder: (_) =>
+            rol == 'VENDEDOR' ? const VendedorHomeScreen() : const MapaScreen(),
       ),
     );
   }
