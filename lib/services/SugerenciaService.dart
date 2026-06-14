@@ -5,13 +5,18 @@ import '../models/models.dart';
 class SugerenciaService {
   final _client = DioClient.instance;
 
-  Future<ApiResponse<List<SugerenciaResponse>>> getMisSugerencias() async {
+  Future<ApiResponse<PaginaResponse<SugerenciaResponse>>> getMisSugerencias({
+    int pagina = 0,
+    int tamanio = 10,
+  }) async {
     try {
-      final response = await _client.dio.get(ApiConstants.misSugerencias);
-      final sugerencias = (response.data as List<dynamic>)
-          .map((s) => SugerenciaResponse.fromJson(s))
-          .toList();
-      return ApiResponse.success(sugerencias);
+      final response = await _client.dio.get(
+        ApiConstants.misSugerencias,
+        queryParameters: {'pagina': pagina, 'tamanio': tamanio},
+      );
+      return ApiResponse.success(
+        PaginaResponse.fromJson(response.data, SugerenciaResponse.fromJson),
+      );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     }

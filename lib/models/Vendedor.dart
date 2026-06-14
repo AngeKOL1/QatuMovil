@@ -50,9 +50,8 @@ class VendedorPerfilDTO {
   final String horarioInicio;
   final String horarioFin;
   final bool visible;
-  final double lat;
-  final double lng;
-  final List<ProductoDTO> productos;
+  final double? lat;
+  final double? lng;
 
   VendedorPerfilDTO({
     required this.id,
@@ -65,9 +64,8 @@ class VendedorPerfilDTO {
     required this.horarioInicio,
     required this.horarioFin,
     required this.visible,
-    required this.lat,
-    required this.lng,
-    required this.productos,
+    this.lat,
+    this.lng,
   });
 
   factory VendedorPerfilDTO.fromJson(Map<String, dynamic> json) =>
@@ -82,10 +80,7 @@ class VendedorPerfilDTO {
         horarioInicio: json['horarioInicio'],
         horarioFin: json['horarioFin'],
         visible: json['visible'],
-        lat: (json['lat'] as num).toDouble(),
-        lng: (json['lng'] as num).toDouble(),
-        productos: (json['productos'] as List<dynamic>)
-            .map((p) => ProductoDTO.fromJson(p))
-            .toList(),
+        lat: json['lat'] != null ? (json['lat'] as num).toDouble() : null,
+        lng: json['lng'] != null ? (json['lng'] as num).toDouble() : null,
       );
 }

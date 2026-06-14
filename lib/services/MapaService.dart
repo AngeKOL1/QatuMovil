@@ -5,18 +5,23 @@ import '../models/models.dart';
 class MapaService {
   final _client = DioClient.instance;
 
-  Future<ApiResponse<List<VendedorMapaDTO>>> getVendedores({
+  Future<ApiResponse<PaginaResponse<VendedorMapaDTO>>> getVendedores({
     String? categoria,
+    int pagina = 0,
+    int tamanio = 100, // más grande para el mapa
   }) async {
     try {
       final response = await _client.dio.get(
         ApiConstants.mapaVendedores,
-        queryParameters: categoria != null ? {'categoria': categoria} : null,
+        queryParameters: {
+          if (categoria != null) 'categoria': categoria,
+          'pagina': pagina,
+          'tamanio': tamanio,
+        },
       );
-      final vendedores = (response.data as List<dynamic>)
-          .map((v) => VendedorMapaDTO.fromJson(v))
-          .toList();
-      return ApiResponse.success(vendedores);
+      return ApiResponse.success(
+        PaginaResponse.fromJson(response.data, VendedorMapaDTO.fromJson),
+      );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     }
@@ -24,7 +29,7 @@ class MapaService {
 
   Future<ApiResponse<VendedorPerfilDTO>> getVendedorPerfil(int id) async {
     try {
-      final response = await _client.dio.get('/vendedores/$id');
+      final response = await _client.dio.get('/vendedores/$id/perfil');
       return ApiResponse.success(VendedorPerfilDTO.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);

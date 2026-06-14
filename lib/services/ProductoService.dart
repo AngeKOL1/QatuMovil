@@ -5,13 +5,18 @@ import '../models/models.dart';
 class ProductoService {
   final _client = DioClient.instance;
 
-  Future<ApiResponse<List<ProductoDTO>>> getMisProductos() async {
+  Future<ApiResponse<PaginaResponse<ProductoDTO>>> getMisProductos({
+    int pagina = 0,
+    int tamanio = 10,
+  }) async {
     try {
-      final response = await _client.dio.get(ApiConstants.misProductos);
-      final productos = (response.data as List<dynamic>)
-          .map((p) => ProductoDTO.fromJson(p))
-          .toList();
-      return ApiResponse.success(productos);
+      final response = await _client.dio.get(
+        ApiConstants.misProductos,
+        queryParameters: {'pagina': pagina, 'tamanio': tamanio},
+      );
+      return ApiResponse.success(
+        PaginaResponse.fromJson(response.data, ProductoDTO.fromJson),
+      );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     }
@@ -50,6 +55,24 @@ class ProductoService {
     try {
       await _client.dio.delete('${ApiConstants.misProductos}/$id');
       return ApiResponse.success(null);
+    } on DioException catch (e) {
+      return ApiResponse.failure(_client.handleError(e).message);
+    }
+  }
+
+  Future<ApiResponse<PaginaResponse<ProductoDTO>>> getProductosVendedor(
+    int vendedorId, {
+    int pagina = 0,
+    int tamanio = 10,
+  }) async {
+    try {
+      final response = await _client.dio.get(
+        '${ApiConstants.productosVendedor}/$vendedorId/productos',
+        queryParameters: {'pagina': pagina, 'tamanio': tamanio},
+      );
+      return ApiResponse.success(
+        PaginaResponse.fromJson(response.data, ProductoDTO.fromJson),
+      );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     }

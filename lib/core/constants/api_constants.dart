@@ -31,4 +31,7 @@ class ApiConstants {
   static const String wsUbicaciones = '/topic/mapa/ubicaciones';
   static const String wsCongestion = '/topic/mapa/congestion';
   static const String wsZonas = '/topic/mapa/zonas';
+
+  //Productos
+  static const String productosVendedor = '/productos';
 }

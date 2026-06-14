@@ -8,3 +8,4 @@ export 'WebSocket.dart';
 export 'Producto.dart';
 export 'UsuarioObservador.dart';
 export 'Zonas.dart';
+export 'pagina_response.dart';

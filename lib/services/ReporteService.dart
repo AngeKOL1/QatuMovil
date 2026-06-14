@@ -19,13 +19,18 @@ class ReporteService {
     }
   }
 
-  Future<ApiResponse<List<ReporteResponse>>> getMisReportes() async {
+  Future<ApiResponse<PaginaResponse<ReporteResponse>>> getMisReportes({
+    int pagina = 0,
+    int tamanio = 10,
+  }) async {
     try {
-      final response = await _client.dio.get(ApiConstants.misReportes);
-      final reportes = (response.data as List<dynamic>)
-          .map((r) => ReporteResponse.fromJson(r))
-          .toList();
-      return ApiResponse.success(reportes);
+      final response = await _client.dio.get(
+        ApiConstants.misReportes,
+        queryParameters: {'pagina': pagina, 'tamanio': tamanio},
+      );
+      return ApiResponse.success(
+        PaginaResponse.fromJson(response.data, ReporteResponse.fromJson),
+      );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     }

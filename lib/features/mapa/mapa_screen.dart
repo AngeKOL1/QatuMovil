@@ -22,6 +22,7 @@ class _MapaScreenState extends State<MapaScreen> {
   final _wsService = WebSocketService();
   final _authService = AuthService();
   final _mapCtrl = MapController();
+  final _scrollCtrl = ScrollController();
 
   Map<int, VendedorMapaDTO> _vendedores = {};
   bool _loadingVendedores = true;
@@ -53,7 +54,7 @@ class _MapaScreenState extends State<MapaScreen> {
     final resp = await _mapaService.getVendedores(categoria: _categoriaFiltro);
     if (resp.success && resp.data != null) {
       setState(() {
-        _vendedores = {for (var v in resp.data!) v.id: v};
+        _vendedores = {for (var v in resp.data!.contenido) v.id: v};
         _loadingVendedores = false;
       });
     } else {
