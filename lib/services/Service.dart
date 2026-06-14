@@ -5,3 +5,4 @@ export 'WebsocketService.dart';
 export 'ReporteService.dart';
 export 'SugerenciaService.dart';
 export 'UbicacionService.dart';
+export 'VendedorService.dart';

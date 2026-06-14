@@ -1,5 +1,3 @@
-import 'package:qatu_movil/models/Producto.dart';
-
 class VendedorRegisterRequest {
   final String nombre;
   final String email;
