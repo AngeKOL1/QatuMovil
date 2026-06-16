@@ -3,12 +3,12 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/core.dart';
 import '../../../models/models.dart';
-import '../../../services/Service.dart';
+import '../../services/Service.dart';
 import '../auth/login/login_screen.dart';
 import 'vendedor_perfil_sheet.dart';
 
-const _mercadoLat = -7.1638;
-const _mercadoLng = -78.5001;
+const _cajamarcaLat = -7.1617;
+const _cajamarcaLng = -78.5127;
 
 class MapaScreen extends StatefulWidget {
   const MapaScreen({super.key});
@@ -22,10 +22,14 @@ class _MapaScreenState extends State<MapaScreen> {
   final _wsService = WebSocketService();
   final _authService = AuthService();
   final _mapCtrl = MapController();
-  final _scrollCtrl = ScrollController();
 
   Map<int, VendedorMapaDTO> _vendedores = {};
+  List<HeatmapPunto> _heatmapPuntos = [];
+  List<ZonaResponse> _zonas = [];
+
   bool _loadingVendedores = true;
+  bool _mostrarHeatmap = false;
+  bool _mostrarZonas = false;
   String? _categoriaFiltro;
 
   static const _categorias = [
@@ -40,6 +44,8 @@ class _MapaScreenState extends State<MapaScreen> {
   void initState() {
     super.initState();
     _cargarVendedores();
+    _cargarHeatmap();
+    _cargarZonas();
     _conectarWebSocket();
   }
 
@@ -59,6 +65,20 @@ class _MapaScreenState extends State<MapaScreen> {
       });
     } else {
       setState(() => _loadingVendedores = false);
+    }
+  }
+
+  Future<void> _cargarHeatmap() async {
+    final resp = await _mapaService.getHeatmap();
+    if (resp.success && resp.data != null) {
+      setState(() => _heatmapPuntos = resp.data!.puntos);
+    }
+  }
+
+  Future<void> _cargarZonas() async {
+    final resp = await _mapaService.getZonas();
+    if (resp.success && resp.data != null) {
+      setState(() => _zonas = resp.data!);
     }
   }
 
@@ -124,9 +144,9 @@ class _MapaScreenState extends State<MapaScreen> {
           FlutterMap(
             mapController: _mapCtrl,
             options: const MapOptions(
-              initialCenter: LatLng(_mercadoLat, _mercadoLng),
-              initialZoom: 16.5,
-              minZoom: 13,
+              initialCenter: LatLng(_cajamarcaLat, _cajamarcaLng),
+              initialZoom: 15.0,
+              minZoom: 11,
               maxZoom: 19,
             ),
             children: [
@@ -134,6 +154,25 @@ class _MapaScreenState extends State<MapaScreen> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.qatu.app',
               ),
+
+              // Capa de zonas (polígonos)
+              if (_mostrarZonas && _zonas.isNotEmpty)
+                PolygonLayer(
+                  polygons: _zonas
+                      .where((z) => z.activa)
+                      .map((z) => _buildZonaPolygon(z))
+                      .toList(),
+                ),
+
+              // Capa de heatmap (círculos)
+              if (_mostrarHeatmap && _heatmapPuntos.isNotEmpty)
+                CircleLayer(
+                  circles: _heatmapPuntos
+                      .map((p) => _buildHeatmapCircle(p))
+                      .toList(),
+                ),
+
+              // Marcadores de vendedores (siempre encima)
               MarkerLayer(
                 markers: vendedoresVisible.map((v) => _buildMarker(v)).toList(),
               ),
@@ -234,6 +273,119 @@ class _MapaScreenState extends State<MapaScreen> {
             ),
           ),
 
+          // Botones de capas (heatmap y zonas)
+          Positioned(
+            top: 0,
+            right: 12,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 56),
+                child: Column(
+                  children: [
+                    _layerButton(
+                      icon: Icons.thermostat_rounded,
+                      label: 'Calor',
+                      activo: _mostrarHeatmap,
+                      color: AppColors.heatRojo,
+                      onTap: () {
+                        setState(() => _mostrarHeatmap = !_mostrarHeatmap);
+                        if (_mostrarHeatmap) _cargarHeatmap();
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    _layerButton(
+                      icon: Icons.layers_rounded,
+                      label: 'Zonas',
+                      activo: _mostrarZonas,
+                      color: AppColors.zonaReasignacion,
+                      onTap: () {
+                        setState(() => _mostrarZonas = !_mostrarZonas);
+                        if (_mostrarZonas) _cargarZonas();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Leyenda del heatmap
+          if (_mostrarHeatmap)
+            Positioned(
+              top: 0,
+              left: 12,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 56),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 6),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Congestión',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _legendItem(AppColors.heatRojo, 'Alta'),
+                        _legendItem(AppColors.heatAmarillo, 'Media'),
+                        _legendItem(AppColors.heatVerde, 'Baja'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Leyenda de zonas
+          if (_mostrarZonas && !_mostrarHeatmap)
+            Positioned(
+              top: 0,
+              left: 12,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 56),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 6),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Zonas',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _legendItem(AppColors.zonaRestringida, 'Restringida'),
+                        _legendItem(AppColors.zonaReasignacion, 'Reasignación'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
           // Filtros de categoría
           Positioned(
             bottom: 24,
@@ -260,8 +412,62 @@ class _MapaScreenState extends State<MapaScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         onPressed: () =>
-            _mapCtrl.move(const LatLng(_mercadoLat, _mercadoLng), 16.5),
+            _mapCtrl.move(const LatLng(_cajamarcaLat, _cajamarcaLng), 15.0),
         child: const Icon(Icons.my_location_rounded),
+      ),
+    );
+  }
+
+  // ── Builders ──────────────────────────────────────────────
+
+  CircleMarker _buildHeatmapCircle(HeatmapPunto p) {
+    Color color;
+    double radius;
+
+    switch (p.nivel) {
+      case 'ROJO':
+        color = AppColors.heatRojo.withOpacity(0.35);
+        radius = 60;
+        break;
+      case 'AMARILLO':
+        color = AppColors.heatAmarillo.withOpacity(0.3);
+        radius = 45;
+        break;
+      default:
+        color = AppColors.heatVerde.withOpacity(0.25);
+        radius = 30;
+    }
+
+    return CircleMarker(
+      point: LatLng(p.lat, p.lng),
+      radius: radius,
+      color: color,
+      borderColor: color.withOpacity(0.6),
+      borderStrokeWidth: 1,
+      useRadiusInMeter: true,
+    );
+  }
+
+  Polygon _buildZonaPolygon(ZonaResponse z) {
+    final esRestringida = z.tipoZona == 'RESTRINGIDA';
+    final color = esRestringida
+        ? AppColors.zonaRestringida
+        : AppColors.zonaReasignacion;
+
+    // coordenadas vienen como [lng, lat] — las invertimos a LatLng(lat, lng)
+    final puntos = z.coordenadas.map((c) => LatLng(c[1], c[0])).toList();
+
+    return Polygon(
+      points: puntos,
+      color: color.withOpacity(0.15),
+      borderColor: color.withOpacity(0.7),
+      borderStrokeWidth: 2,
+      isFilled: true,
+      label: z.nombre,
+      labelStyle: TextStyle(
+        color: color,
+        fontWeight: FontWeight.w600,
+        fontSize: 12,
       ),
     );
   }
@@ -303,6 +509,68 @@ class _MapaScreenState extends State<MapaScreen> {
       ),
     );
   }
+
+  // ── Widgets auxiliares ─────────────────────────────────────
+
+  Widget _layerButton({
+    required IconData icon,
+    required String label,
+    required bool activo,
+    required Color color,
+    required VoidCallback onTap,
+  }) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: activo ? color : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: activo ? Colors.white : AppColors.textSecondary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: activo ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _legendItem(Color color, String label) => Padding(
+    padding: const EdgeInsets.only(bottom: 3),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.5),
+            shape: BoxShape.circle,
+            border: Border.all(color: color, width: 1),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+      ],
+    ),
+  );
 
   Widget _filterChip(String label, String? value) {
     final selected = _categoriaFiltro == value;

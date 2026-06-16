@@ -64,6 +64,23 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
     if (_perfil == null || _toggling) return;
     final nuevoEstado = !_perfil!.visible;
 
+    // Si se va a activar, verificar permisos de ubicación primero
+    if (nuevoEstado) {
+      final pos = await _ubicacionService.obtenerPosicion();
+      if (pos == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Necesitas activar la ubicación para aparecer en el mapa',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return; // No continúa si no hay permisos
+      }
+    }
+
     setState(() => _toggling = true);
 
     final resp = await _ubicacionService.cambiarEstado(nuevoEstado);
