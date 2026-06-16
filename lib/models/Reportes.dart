@@ -12,25 +12,31 @@ class ReporteRequest {
 
 class ReporteResponse {
   final int id;
+  final int vendedorId;
+  final String vendedorNombre;
   final String asunto;
   final String descripcion;
   final String estado;
-  final String fechaEnvio;
+  final String createdAt;
 
   ReporteResponse({
     required this.id,
+    required this.vendedorId,
+    required this.vendedorNombre,
     required this.asunto,
     required this.descripcion,
     required this.estado,
-    required this.fechaEnvio,
+    required this.createdAt,
   });
 
   factory ReporteResponse.fromJson(Map<String, dynamic> json) =>
       ReporteResponse(
         id: json['id'],
+        vendedorId: json['vendedorId'],
+        vendedorNombre: json['vendedorNombre'],
         asunto: json['asunto'],
         descripcion: json['descripcion'],
         estado: json['estado'],
-        fechaEnvio: json['fechaEnvio'],
+        createdAt: json['createdAt'],
       );
 }

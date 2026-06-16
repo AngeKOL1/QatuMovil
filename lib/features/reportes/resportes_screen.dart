@@ -242,7 +242,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
               ),
               const SizedBox(width: 4),
               Text(
-                _formatFecha(r.fechaEnvio),
+                _formatFecha(r.createdAt),
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
               ),
             ],
