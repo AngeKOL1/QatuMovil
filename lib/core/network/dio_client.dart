@@ -92,17 +92,23 @@ class DioClient {
         String msg = 'Error $status';
 
         if (body is Map<String, dynamic>) {
-          msg =
-              body['detail']?.toString() ??
-              body['message']?.toString() ??
-              body['error']?.toString() ??
-              body['title']?.toString() ??
-              msg;
+          // Si tiene errores por campo, construir mensaje legible
+          if (body['campos'] != null && body['campos'] is Map) {
+            final campos = body['campos'] as Map<String, dynamic>;
+            msg = campos.values.join('\n');
+          } else {
+            msg =
+                body['detail']?.toString() ??
+                body['message']?.toString() ??
+                body['error']?.toString() ??
+                body['title']?.toString() ??
+                msg;
+          }
         }
 
-        // if (status == 401) return UnauthorizedException(msg);
+        if (status == 401) return UnauthorizedException();
         if (status == 404) return NotFoundException(msg);
-        if (status == 422) return ValidationException(msg);
+        if (status == 400 || status == 422) return ValidationException(msg);
 
         return ServerException(msg);
 
