@@ -6,6 +6,7 @@ import '../../services/Service.dart';
 import '../auth/login/login_screen.dart';
 import '../mapa/mapa_screen.dart';
 import '../sugerencias/sugerencias_screen.dart';
+import '../reportes/resportes_screen.dart';
 
 class VendedorHomeScreen extends StatefulWidget {
   const VendedorHomeScreen({super.key});
@@ -409,12 +410,10 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
                     icon: Icons.description_rounded,
                     label: 'Reportes',
                     color: AppColors.comida,
-                    onTap: () {
-                      // TODO: Navigator.push → ReportesScreen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Reportes próximamente')),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ReportesScreen()),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
