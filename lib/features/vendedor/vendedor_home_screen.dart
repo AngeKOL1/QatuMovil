@@ -5,6 +5,7 @@ import '../../../models/models.dart';
 import '../../services/Service.dart';
 import '../auth/login/login_screen.dart';
 import '../mapa/mapa_screen.dart';
+import '../sugerencias/sugerencias_screen.dart';
 
 class VendedorHomeScreen extends StatefulWidget {
   const VendedorHomeScreen({super.key});
@@ -390,14 +391,12 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
                     icon: Icons.lightbulb_rounded,
                     label: 'Sugerencias',
                     color: AppColors.secondary,
-                    onTap: () {
-                      // TODO: Navigator.push → SugerenciasScreen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sugerencias próximamente'),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SugerenciasScreen(),
+                      ),
+                    ),
                   ),
                 ),
               ],

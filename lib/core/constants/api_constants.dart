@@ -16,7 +16,7 @@ class ApiConstants {
   static const String miUbicacion = '/vendedores/mi-ubicacion';
   static const String miEstado = '/vendedores/mi-estado';
   static const String miFcmToken = '/vendedores/mi-fcm-token';
-  static const String misProductos = '/vendedores/mis-productos';
+  static const String misProductos = '/productos/mis-productos';
   static const String misReportes = '/vendedores/mis-reportes';
 
   // Sugerencias
