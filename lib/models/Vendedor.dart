@@ -2,6 +2,7 @@ class VendedorRegisterRequest {
   final String nombre;
   final String email;
   final String password;
+  final String confirmPassword;
   final String dni;
   final String telefono;
   final String? descripcion;
@@ -14,6 +15,7 @@ class VendedorRegisterRequest {
     required this.nombre,
     required this.email,
     required this.password,
+    required this.confirmPassword,
     required this.dni,
     required this.telefono,
     this.descripcion,
@@ -27,6 +29,7 @@ class VendedorRegisterRequest {
     'nombre': nombre,
     'email': email,
     'password': password,
+    'confirmPassword': confirmPassword,
     'dni': dni,
     'telefono': telefono,
     if (descripcion != null) 'descripcion': descripcion,

@@ -20,6 +20,7 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
   final _nombreCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _confirmPassCtrl = TextEditingController();
   final _dniCtrl = TextEditingController();
   final _telefonoCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
@@ -84,6 +85,7 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
         nombre: _nombreCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text,
+        confirmPassword: _confirmPassCtrl.text,
         dni: _dniCtrl.text.trim(),
         telefono: _telefonoCtrl.text.trim(),
         descripcion: _descCtrl.text.trim(),
@@ -136,6 +138,15 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
               _field(
                 _passCtrl,
                 'Contraseña',
+                Icons.lock_outline,
+                obscure: true,
+                // Validación contraseña — mínimo 8 no 6
+                validator: (v) =>
+                    (v?.length ?? 0) < 8 ? 'Mínimo 8 caracteres' : null,
+              ),
+              _field(
+                _confirmPassCtrl,
+                'Confirmar contraseña',
                 Icons.lock_outline,
                 obscure: true,
                 // Validación contraseña — mínimo 8 no 6
