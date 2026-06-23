@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:qatu_movil/core/core.dart';
 import 'package:qatu_movil/features/vendedor/vendedor_home_screen.dart';
-import 'core/constants/app_colors.dart';
-import 'core/storage/secure_storage.dart';
 import 'features/auth/login/login_screen.dart';
 import 'features/mapa/mapa_screen.dart';
 
@@ -18,8 +17,12 @@ class QatuApp extends StatelessWidget {
     return MaterialApp(
       title: 'Qatu',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey,
       theme: _buildTheme(),
       home: const SplashRouter(),
+      routes: {
+        '/login': (_) => const LoginScreen(), // ← agregar
+      },
     );
   }
 

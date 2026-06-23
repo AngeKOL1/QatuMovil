@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import '../constants/api_constants.dart';
-import '../storage/secure_storage.dart';
-import '../errors/exceptions.dart';
+import 'package:qatu_movil/core/core.dart';
 
 class DioClient {
   static DioClient? _instance;
@@ -52,6 +50,7 @@ class DioClient {
           if (e.response?.statusCode == 401) {
             // Token expirado → limpiar sesión
             await _storage.clearAll();
+            NavigationService.navigateToLogin();
             return handler.reject(
               DioException(
                 requestOptions: e.requestOptions,
