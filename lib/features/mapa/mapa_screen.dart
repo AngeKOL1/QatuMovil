@@ -9,6 +9,8 @@ import 'vendedor_perfil_sheet.dart';
 
 const _cajamarcaLat = -7.1617;
 const _cajamarcaLng = -78.5127;
+final _searchCtrl = TextEditingController();
+String _busqueda = '';
 
 class MapaScreen extends StatefulWidget {
   const MapaScreen({super.key});
@@ -52,6 +54,7 @@ class _MapaScreenState extends State<MapaScreen> {
   @override
   void dispose() {
     _wsService.disconnect();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -133,9 +136,11 @@ class _MapaScreenState extends State<MapaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vendedoresVisible = _vendedores.values
-        .where((v) => v.visible)
-        .toList();
+    final vendedoresVisible = _vendedores.values.where((v) {
+      if (!v.visible) return false;
+      if (_busqueda.isEmpty) return true;
+      return v.nombreNegocio.toLowerCase().contains(_busqueda.toLowerCase());
+    }).toList();
 
     return Scaffold(
       body: Stack(
@@ -273,13 +278,66 @@ class _MapaScreenState extends State<MapaScreen> {
             ),
           ),
 
+          // Barra de búsqueda
+          Positioned(
+            top: 0,
+            left: 12,
+            right: 12,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 56),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 8),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (value) => setState(() => _busqueda = value),
+                    decoration: InputDecoration(
+                      hintText: '"Jugos", "Frutas", "Ropa"...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: AppColors.textSecondary,
+                      ),
+                      suffixIcon: _busqueda.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: AppColors.textSecondary,
+                              ),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _busqueda = '');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // Botones de capas (heatmap y zonas)
           Positioned(
             top: 0,
             right: 12,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.only(top: 56),
+                padding: const EdgeInsets.only(top: 112),
                 child: Column(
                   children: [
                     _layerButton(
@@ -316,7 +374,7 @@ class _MapaScreenState extends State<MapaScreen> {
               left: 12,
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 56),
+                  padding: const EdgeInsets.only(top: 112),
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -355,7 +413,7 @@ class _MapaScreenState extends State<MapaScreen> {
               left: 12,
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 56),
+                  padding: const EdgeInsets.only(top: 112),
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
