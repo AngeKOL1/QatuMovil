@@ -30,6 +30,8 @@ class UbicacionService {
       return ApiResponse.success(null);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -42,6 +44,8 @@ class UbicacionService {
       return ApiResponse.success(null);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -54,6 +58,8 @@ class UbicacionService {
       return ApiResponse.success(null);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 

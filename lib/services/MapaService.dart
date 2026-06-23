@@ -24,6 +24,8 @@ class MapaService {
       );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -33,6 +35,8 @@ class MapaService {
       return ApiResponse.success(VendedorPerfilDTO.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -42,6 +46,8 @@ class MapaService {
       return ApiResponse.success(HeatmapResponse.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -57,6 +63,8 @@ class MapaService {
       return ApiResponse.success(zonas);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 }

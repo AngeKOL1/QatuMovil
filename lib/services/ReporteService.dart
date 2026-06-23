@@ -16,6 +16,8 @@ class ReporteService {
       return ApiResponse.success(ReporteResponse.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -33,6 +35,8 @@ class ReporteService {
       );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 }

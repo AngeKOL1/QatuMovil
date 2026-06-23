@@ -19,6 +19,8 @@ class ProductoService {
       );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -33,6 +35,8 @@ class ProductoService {
       return ApiResponse.success(ProductoDTO.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -48,6 +52,8 @@ class ProductoService {
       return ApiResponse.success(ProductoDTO.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -57,6 +63,8 @@ class ProductoService {
       return ApiResponse.success(null);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -75,6 +83,8 @@ class ProductoService {
       );
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 }

@@ -23,6 +23,8 @@ class AuthService {
       return ApiResponse.success(loginResp);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -37,6 +39,8 @@ class AuthService {
       return ApiResponse.success(null);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 
@@ -51,6 +55,8 @@ class AuthService {
       return ApiResponse.success(null);
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 

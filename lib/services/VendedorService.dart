@@ -16,6 +16,8 @@ class VendedorService {
       return ApiResponse.success(VendedorPerfilDTO.fromJson(response.data));
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
+    } catch (e) {
+      return ApiResponse.failure('Error inseperado: $e');
     }
   }
 }
