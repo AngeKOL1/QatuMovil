@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:qatu_movil/core/core.dart';
 import 'package:qatu_movil/features/vendedor/vendedor_home_screen.dart';
+import 'package:qatu_movil/services/NotificationService.dart';
 import 'features/auth/login/login_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'features/mapa/mapa_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  final notificationService = NotificationService();
+  await notificationService.initialize();
   runApp(const QatuApp());
 }
 
@@ -21,7 +26,8 @@ class QatuApp extends StatelessWidget {
       theme: _buildTheme(),
       home: const SplashRouter(),
       routes: {
-        '/login': (_) => const LoginScreen(), // ← agregar
+        '/login': (_) => const LoginScreen(),
+        '/mapa': (_) => MapaScreen(),
       },
     );
   }
@@ -97,8 +103,9 @@ class _SplashRouterState extends State<SplashRouter> {
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) =>
-            rol == 'VENDEDOR' ? const VendedorHomeScreen() : const MapaScreen(),
+        builder: (_) => rol == 'VENDEDOR'
+            ? const VendedorHomeScreen()
+            : MapaScreen(key: UniqueKey()), // ← sin const, con UniqueKey
       ),
     );
   }

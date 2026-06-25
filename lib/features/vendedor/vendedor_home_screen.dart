@@ -362,7 +362,9 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
                 label: const Text('Ver mapa'),
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const MapaScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => MapaScreen(key: UniqueKey()),
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

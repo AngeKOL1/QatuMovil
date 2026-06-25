@@ -13,7 +13,7 @@ final _searchCtrl = TextEditingController();
 String _busqueda = '';
 
 class MapaScreen extends StatefulWidget {
-  const MapaScreen({super.key});
+  MapaScreen({super.key});
 
   @override
   State<MapaScreen> createState() => _MapaScreenState();
@@ -23,7 +23,8 @@ class _MapaScreenState extends State<MapaScreen> {
   final _mapaService = MapaService();
   final _wsService = WebSocketService();
   final _authService = AuthService();
-  final _mapCtrl = MapController();
+  late final TextEditingController _searchCtrl;
+  late final MapController _mapCtrl;
 
   Map<int, VendedorMapaDTO> _vendedores = {};
   List<HeatmapPunto> _heatmapPuntos = [];
@@ -45,6 +46,8 @@ class _MapaScreenState extends State<MapaScreen> {
   @override
   void initState() {
     super.initState();
+    _searchCtrl = TextEditingController();
+    _mapCtrl = MapController();
     _cargarVendedores();
     _cargarHeatmap();
     _cargarZonas();
@@ -53,14 +56,19 @@ class _MapaScreenState extends State<MapaScreen> {
 
   @override
   void dispose() {
+    _wsService.onUbicacionActualizada = null;
+    _wsService.onCongestionDetectada = null;
     _wsService.disconnect();
     _searchCtrl.dispose();
+    _mapCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _cargarVendedores() async {
+    if (!mounted) return;
     setState(() => _loadingVendedores = true);
     final resp = await _mapaService.getVendedores(categoria: _categoriaFiltro);
+    if (!mounted) return;
     if (resp.success && resp.data != null) {
       setState(() {
         _vendedores = {for (var v in resp.data!.contenido) v.id: v};
@@ -73,6 +81,7 @@ class _MapaScreenState extends State<MapaScreen> {
 
   Future<void> _cargarHeatmap() async {
     final resp = await _mapaService.getHeatmap();
+    if (!mounted) return;
     if (resp.success && resp.data != null) {
       setState(() => _heatmapPuntos = resp.data!.puntos);
     }
@@ -80,6 +89,7 @@ class _MapaScreenState extends State<MapaScreen> {
 
   Future<void> _cargarZonas() async {
     final resp = await _mapaService.getZonas();
+    if (!mounted) return;
     if (resp.success && resp.data != null) {
       setState(() => _zonas = resp.data!);
     }
@@ -87,6 +97,7 @@ class _MapaScreenState extends State<MapaScreen> {
 
   void _conectarWebSocket() {
     _wsService.onUbicacionActualizada = (evento) {
+      if (!mounted) return;
       setState(() {
         if (!evento.visible) {
           _vendedores.remove(evento.vendedorId);

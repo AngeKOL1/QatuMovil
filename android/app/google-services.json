@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "559406678539",
+    "project_id": "qatu-app",
+    "storage_bucket": "qatu-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559406678539:android:23b0b70c3084b8c3ce3d0e",
+        "android_client_info": {
+          "package_name": "com.example.qatu_movil"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdKLJbLCC5cVxHIyzMUyIPMZFc9nitVVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559406678539:android:4aaac4f647af4af3ce3d0e",
+        "android_client_info": {
+          "package_name": "com.qatu.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdKLJbLCC5cVxHIyzMUyIPMZFc9nitVVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

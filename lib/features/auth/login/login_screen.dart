@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
           builder: (_) => rol == 'VENDEDOR'
               ? const VendedorHomeScreen()
-              : const MapaScreen(),
+              : MapaScreen(key: UniqueKey()), // ← sin const, con UniqueKey
         ),
         (_) => false,
       );
