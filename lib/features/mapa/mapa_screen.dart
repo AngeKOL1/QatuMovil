@@ -6,10 +6,10 @@ import '../../../models/models.dart';
 import '../../services/Service.dart';
 import '../auth/login/login_screen.dart';
 import 'vendedor_perfil_sheet.dart';
+import '../observador/observador_perfil_screen.dart';
 
 const _cajamarcaLat = -7.1617;
 const _cajamarcaLng = -78.5127;
-final _searchCtrl = TextEditingController();
 String _busqueda = '';
 
 class MapaScreen extends StatefulWidget {
@@ -23,6 +23,7 @@ class _MapaScreenState extends State<MapaScreen> {
   final _mapaService = MapaService();
   final _wsService = WebSocketService();
   final _authService = AuthService();
+  String? _userRol;
   late final TextEditingController _searchCtrl;
   late final MapController _mapCtrl;
 
@@ -43,11 +44,18 @@ class _MapaScreenState extends State<MapaScreen> {
     'OTROS',
   ];
 
+  Future<void> _cargarRol() async {
+    final storage = SecureStorageService();
+    final rol = await storage.getRol();
+    if (mounted) setState(() => _userRol = rol);
+  }
+
   @override
   void initState() {
     super.initState();
     _searchCtrl = TextEditingController();
     _mapCtrl = MapController();
+    _cargarRol();
     _cargarVendedores();
     _cargarHeatmap();
     _cargarZonas();
@@ -276,12 +284,25 @@ class _MapaScreenState extends State<MapaScreen> {
                           BoxShadow(color: Colors.black12, blurRadius: 8),
                         ],
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.logout_rounded),
-                        color: AppColors.textSecondary,
-                        onPressed: _logout,
-                        tooltip: 'Cerrar sesión',
-                      ),
+                      child: _userRol == 'USUARIO_OBSERVADOR'
+                          ? IconButton(
+                              icon: const Icon(Icons.person_rounded),
+                              color: AppColors.secondary,
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const ObservadorPerfilScreen(),
+                                ),
+                              ),
+                              tooltip: 'Mi perfil',
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.logout_rounded),
+                              color: AppColors.textSecondary,
+                              onPressed: _logout,
+                              tooltip: 'Cerrar sesión',
+                            ),
                     ),
                   ],
                 ),
