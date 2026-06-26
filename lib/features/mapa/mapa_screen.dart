@@ -5,12 +5,13 @@ import '../../../core/core.dart';
 import '../../../models/models.dart';
 import '../../services/Service.dart';
 import '../auth/login/login_screen.dart';
-import 'vendedor_perfil_sheet.dart';
 import '../observador/observador_perfil_screen.dart';
+import 'vendedor_perfil_sheet.dart';
+import 'widgets/ruta_layer.dart';
+import 'widgets/sugerencia_banner.dart';
 
 const _cajamarcaLat = -7.1617;
 const _cajamarcaLng = -78.5127;
-String _busqueda = '';
 
 class MapaScreen extends StatefulWidget {
   MapaScreen({super.key});
@@ -23,9 +24,12 @@ class _MapaScreenState extends State<MapaScreen> {
   final _mapaService = MapaService();
   final _wsService = WebSocketService();
   final _authService = AuthService();
-  String? _userRol;
-  late final TextEditingController _searchCtrl;
-  late final MapController _mapCtrl;
+  final _sugerenciaService = SugerenciaService();
+  final _ubicacionService = UbicacionService();
+
+  late TextEditingController _searchCtrl;
+  late MapController _mapCtrl;
+  String _busqueda = '';
 
   Map<int, VendedorMapaDTO> _vendedores = {};
   List<HeatmapPunto> _heatmapPuntos = [];
@@ -35,6 +39,14 @@ class _MapaScreenState extends State<MapaScreen> {
   bool _mostrarHeatmap = false;
   bool _mostrarZonas = false;
   String? _categoriaFiltro;
+  String? _userRol;
+
+  // Estado de ruta sugerida
+  LatLng? _rutaDestino;
+  LatLng? _rutaOrigen;
+  bool _mostrarBannerRuta = false;
+  bool _respondiendo = false;
+  String _mensajeRuta = 'Te sugerimos moverte a una zona menos congestionada';
 
   static const _categorias = [
     'COMIDA',
@@ -43,12 +55,6 @@ class _MapaScreenState extends State<MapaScreen> {
     'SERVICIOS',
     'OTROS',
   ];
-
-  Future<void> _cargarRol() async {
-    final storage = SecureStorageService();
-    final rol = await storage.getRol();
-    if (mounted) setState(() => _userRol = rol);
-  }
 
   @override
   void initState() {
@@ -60,6 +66,7 @@ class _MapaScreenState extends State<MapaScreen> {
     _cargarHeatmap();
     _cargarZonas();
     _conectarWebSocket();
+    _configurarFcm();
   }
 
   @override
@@ -67,9 +74,116 @@ class _MapaScreenState extends State<MapaScreen> {
     _wsService.onUbicacionActualizada = null;
     _wsService.onCongestionDetectada = null;
     _wsService.disconnect();
+    // Limpiar callbacks de FCM
+    FcmHandler.instance.onRutaSugerida = null;
+    FcmHandler.instance.onSugerenciaReasignacion = null;
     _searchCtrl.dispose();
     _mapCtrl.dispose();
     super.dispose();
+  }
+
+  void _configurarFcm() {
+    FcmHandler.instance.onRutaSugerida = (lat, lng) {
+      if (!mounted) return;
+      _mostrarRutaSugerida(lat, lng);
+    };
+
+    FcmHandler.instance.onSugerenciaReasignacion = () {
+      if (!mounted) return;
+      setState(() {
+        _mostrarBannerRuta = true;
+        _rutaDestino = null;
+        _rutaOrigen = null;
+        _mensajeRuta = 'Hay una zona disponible cerca. Revisa tus sugerencias.';
+      });
+    };
+  }
+
+  Future<void> _mostrarRutaSugerida(double lat, double lng) async {
+    // Obtener ubicación actual del vendedor
+    final pos = await _ubicacionService.obtenerPosicion();
+
+    if (!mounted) return;
+    setState(() {
+      _rutaDestino = LatLng(lat, lng);
+      _rutaOrigen = pos != null
+          ? LatLng(pos.latitude, pos.longitude)
+          : const LatLng(_cajamarcaLat, _cajamarcaLng);
+      _mostrarBannerRuta = true;
+      _mensajeRuta = 'Te sugerimos moverte a una zona menos congestionada';
+    });
+
+    // Centrar el mapa para mostrar la ruta
+    if (_rutaOrigen != null && _rutaDestino != null) {
+      final midLat = (_rutaOrigen!.latitude + _rutaDestino!.latitude) / 2;
+      final midLng = (_rutaOrigen!.longitude + _rutaDestino!.longitude) / 2;
+      _mapCtrl.move(LatLng(midLat, midLng), 15.0);
+    }
+  }
+
+  Future<void> _aceptarRuta() async {
+    setState(() => _respondiendo = true);
+
+    // Buscar la sugerencia pendiente más reciente
+    final resp = await _sugerenciaService.getMisSugerencias(
+      pagina: 0,
+      tamanio: 1,
+    );
+
+    if (!mounted) return;
+
+    if (resp.success && resp.data != null && resp.data!.contenido.isNotEmpty) {
+      final sugerencia = resp.data!.contenido.first;
+      if (sugerencia.estado == 'ENVIADA') {
+        await _sugerenciaService.responderSugerencia(sugerencia.id, 'ACEPTADA');
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _respondiendo = false;
+      // Mantener la ruta como guía
+      _mostrarBannerRuta = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Ruta aceptada — sigue la línea azul'),
+        backgroundColor: Color(0xFF10B981),
+      ),
+    );
+  }
+
+  Future<void> _ignorarRuta() async {
+    setState(() => _respondiendo = true);
+
+    final resp = await _sugerenciaService.getMisSugerencias(
+      pagina: 0,
+      tamanio: 1,
+    );
+
+    if (!mounted) return;
+
+    if (resp.success && resp.data != null && resp.data!.contenido.isNotEmpty) {
+      final sugerencia = resp.data!.contenido.first;
+      if (sugerencia.estado == 'ENVIADA') {
+        await _sugerenciaService.responderSugerencia(sugerencia.id, 'IGNORADA');
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _respondiendo = false;
+      _mostrarBannerRuta = false;
+      _rutaDestino = null;
+      _rutaOrigen = null;
+    });
+  }
+
+  Future<void> _cargarRol() async {
+    final storage = SecureStorageService();
+    final rol = await storage.getRol();
+    if (mounted) setState(() => _userRol = rol);
   }
 
   Future<void> _cargarVendedores() async {
@@ -179,7 +293,7 @@ class _MapaScreenState extends State<MapaScreen> {
                 userAgentPackageName: 'com.qatu.app',
               ),
 
-              // Capa de zonas (polígonos)
+              // Capa de zonas
               if (_mostrarZonas && _zonas.isNotEmpty)
                 PolygonLayer(
                   polygons: _zonas
@@ -188,7 +302,7 @@ class _MapaScreenState extends State<MapaScreen> {
                       .toList(),
                 ),
 
-              // Capa de heatmap (círculos)
+              // Capa de heatmap
               if (_mostrarHeatmap && _heatmapPuntos.isNotEmpty)
                 CircleLayer(
                   circles: _heatmapPuntos
@@ -196,9 +310,17 @@ class _MapaScreenState extends State<MapaScreen> {
                       .toList(),
                 ),
 
-              // Marcadores de vendedores (siempre encima)
+              // Capa de ruta sugerida
+              if (_rutaOrigen != null && _rutaDestino != null)
+                RutaLayer(origen: _rutaOrigen!, destino: _rutaDestino!),
+
+              // Marcadores de vendedores
               MarkerLayer(
-                markers: vendedoresVisible.map((v) => _buildMarker(v)).toList(),
+                markers: [
+                  ...vendedoresVisible.map((v) => _buildMarker(v)),
+                  // Marcador de destino de ruta
+                  if (_rutaDestino != null) DestinoMarker.build(_rutaDestino!),
+                ],
               ),
             ],
           ),
@@ -363,7 +485,7 @@ class _MapaScreenState extends State<MapaScreen> {
             ),
           ),
 
-          // Botones de capas (heatmap y zonas)
+          // Botones de capas
           Positioned(
             top: 0,
             right: 12,
@@ -478,7 +600,7 @@ class _MapaScreenState extends State<MapaScreen> {
 
           // Filtros de categoría
           Positioned(
-            bottom: 24,
+            bottom: _mostrarBannerRuta ? 200 : 24,
             left: 0,
             right: 0,
             child: SizedBox(
@@ -493,6 +615,20 @@ class _MapaScreenState extends State<MapaScreen> {
               ),
             ),
           ),
+
+          // Banner de sugerencia de ruta
+          if (_mostrarBannerRuta)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: SugerenciaBanner(
+                mensaje: _mensajeRuta,
+                cargando: _respondiendo,
+                onAceptar: _aceptarRuta,
+                onIgnorar: _ignorarRuta,
+              ),
+            ),
 
           if (_loadingVendedores)
             const Center(child: CircularProgressIndicator()),
@@ -544,7 +680,6 @@ class _MapaScreenState extends State<MapaScreen> {
         ? AppColors.zonaRestringida
         : AppColors.zonaReasignacion;
 
-    // coordenadas vienen como [lng, lat] — las invertimos a LatLng(lat, lng)
     final puntos = z.coordenadas.map((c) => LatLng(c[1], c[0])).toList();
 
     return Polygon(

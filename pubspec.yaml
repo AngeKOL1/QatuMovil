@@ -37,6 +37,9 @@ dependencies:
   # Almacenamiento seguro del JWT
   flutter_secure_storage: ^9.0.0
 
+  # Notificaciones locales en primer plano
+  flutter_local_notifications: ^17.0.0
+
   # Mapa
   flutter_map: ^6.1.0
   latlong2: ^0.9.0
