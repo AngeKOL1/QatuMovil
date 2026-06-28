@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qatu_movil/features/vendedor/vendedor_home_screen.dart';
 import '../../../core/core.dart';
 import '../../../models/models.dart';
 import '../../../services/Service.dart';
@@ -100,15 +101,34 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
     setState(() => _loading = false);
 
     if (resp.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Cuenta creada! Inicia sesión')),
+      // Auto-login después de registrarse
+      final loginResp = await _authService.login(
+        LoginRequest(email: _emailCtrl.text.trim(), password: _passCtrl.text),
       );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (_) => false,
-      );
-    } else {
-      setState(() => _error = resp.error);
+
+      if (!mounted) return;
+
+      if (loginResp.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Bienvenido a Qatu!'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const VendedorHomeScreen()),
+          (_) => false,
+        );
+      } else {
+        // Si el auto-login falla, ir al login normal
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cuenta creada. Inicia sesión')),
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (_) => false,
+        );
+      }
     }
   }
 

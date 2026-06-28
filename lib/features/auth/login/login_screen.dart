@@ -52,10 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
           builder: (_) => rol == 'VENDEDOR'
               ? const VendedorHomeScreen()
-              : MapaScreen(key: UniqueKey()), // ← sin const, con UniqueKey
+              : MapaScreen(key: UniqueKey()),
         ),
         (_) => false,
       );
+    } else {
+      setState(() => _error = resp.error ?? 'Credenciales incorrectas');
     }
   }
 
