@@ -3,8 +3,8 @@ class VendedorMapaDTO {
   final String nombreNegocio;
   final String categoria;
   final String movilidad;
-  final double lat;
-  final double lng;
+  final double? lat; // ← nullable
+  final double? lng; // ← nullable
   final bool visible;
 
   VendedorMapaDTO({
@@ -12,8 +12,8 @@ class VendedorMapaDTO {
     required this.nombreNegocio,
     required this.categoria,
     required this.movilidad,
-    required this.lat,
-    required this.lng,
+    this.lat,
+    this.lng,
     required this.visible,
   });
 
@@ -23,12 +23,11 @@ class VendedorMapaDTO {
         nombreNegocio: json['nombreNegocio'],
         categoria: json['categoria'],
         movilidad: json['movilidad'],
-        lat: (json['lat'] as num).toDouble(),
-        lng: (json['lng'] as num).toDouble(),
+        lat: json['lat'] != null ? (json['lat'] as num).toDouble() : null,
+        lng: json['lng'] != null ? (json['lng'] as num).toDouble() : null,
         visible: json['visible'],
       );
 
-  // Actualización desde evento WebSocket
   VendedorMapaDTO copyWith({double? lat, double? lng, bool? visible}) =>
       VendedorMapaDTO(
         id: id,

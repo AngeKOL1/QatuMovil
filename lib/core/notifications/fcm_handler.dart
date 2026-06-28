@@ -67,7 +67,6 @@ class FcmHandler {
     // Token FCM
     final token = await FirebaseMessaging.instance.getToken();
     if (token != null) {
-      print('🔑 FCM TOKEN: $token'); // ← agregar
       await _registrarToken(token);
     }
     FirebaseMessaging.instance.onTokenRefresh.listen(_registrarToken);

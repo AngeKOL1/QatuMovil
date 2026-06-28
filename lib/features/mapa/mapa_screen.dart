@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -48,6 +50,8 @@ class _MapaScreenState extends State<MapaScreen> {
   bool _respondiendo = false;
   String _mensajeRuta = 'Te sugerimos moverte a una zona menos congestionada';
 
+  Timer? _refreshTimer;
+
   static const _categorias = [
     'COMIDA',
     'ROPA',
@@ -67,14 +71,22 @@ class _MapaScreenState extends State<MapaScreen> {
     _cargarZonas();
     _conectarWebSocket();
     _configurarFcm();
+    _iniciarAutoRefresh();
+  }
+
+  void _iniciarAutoRefresh() {
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _cargarVendedores(),
+    );
   }
 
   @override
   void dispose() {
+    _refreshTimer?.cancel(); // ← agregar
     _wsService.onUbicacionActualizada = null;
     _wsService.onCongestionDetectada = null;
     _wsService.disconnect();
-    // Limpiar callbacks de FCM
     FcmHandler.instance.onRutaSugerida = null;
     FcmHandler.instance.onSugerenciaReasignacion = null;
     _searchCtrl.dispose();
@@ -189,7 +201,9 @@ class _MapaScreenState extends State<MapaScreen> {
   Future<void> _cargarVendedores() async {
     if (!mounted) return;
     setState(() => _loadingVendedores = true);
+
     final resp = await _mapaService.getVendedores(categoria: _categoriaFiltro);
+
     if (!mounted) return;
     if (resp.success && resp.data != null) {
       setState(() {
@@ -271,6 +285,7 @@ class _MapaScreenState extends State<MapaScreen> {
   Widget build(BuildContext context) {
     final vendedoresVisible = _vendedores.values.where((v) {
       if (!v.visible) return false;
+      if (v.lat == null || v.lng == null) return false; // ← agregar
       if (_busqueda.isEmpty) return true;
       return v.nombreNegocio.toLowerCase().contains(_busqueda.toLowerCase());
     }).toList();
@@ -700,7 +715,7 @@ class _MapaScreenState extends State<MapaScreen> {
   Marker _buildMarker(VendedorMapaDTO v) {
     final color = AppColors.forCategoria(v.categoria);
     return Marker(
-      point: LatLng(v.lat, v.lng),
+      point: LatLng(v.lat!, v.lng!),
       width: 44,
       height: 54,
       child: GestureDetector(

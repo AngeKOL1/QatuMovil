@@ -4,6 +4,7 @@ import 'package:qatu_movil/features/vendedor/vendedor_home_screen.dart';
 import 'features/auth/login/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'features/mapa/mapa_screen.dart';
+import 'shared/widgets/connection_banner.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,10 +23,13 @@ class QatuApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
       theme: _buildTheme(),
-      home: const SplashRouter(),
       routes: {
         '/login': (_) => const LoginScreen(),
-        '/mapa': (_) => MapaScreen(),
+        '/mapa': (_) => MapaScreen(key: UniqueKey()),
+      },
+      home: const SplashRouter(),
+      builder: (context, child) {
+        return ConnectionBanner(child: child!);
       },
     );
   }

@@ -64,7 +64,7 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
     if (_perfil == null || _toggling) return;
     final nuevoEstado = !_perfil!.visible;
 
-    // Si se va a activar, verificar permisos de ubicación primero
+    // Si se va a activar, obtener y publicar ubicación PRIMERO
     if (nuevoEstado) {
       final pos = await _ubicacionService.obtenerPosicion();
       if (pos == null) {
@@ -77,61 +77,100 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
             backgroundColor: Colors.orange,
           ),
         );
-        return; // No continúa si no hay permisos
-      }
-    }
-
-    setState(() => _toggling = true);
-
-    final resp = await _ubicacionService.cambiarEstado(nuevoEstado);
-
-    if (!mounted) return;
-    setState(() => _toggling = false);
-
-    if (resp.success) {
-      setState(() {
-        _perfil = VendedorPerfilDTO(
-          id: _perfil!.id,
-          nombre: _perfil!.nombre,
-          nombreNegocio: _perfil!.nombreNegocio,
-          descripcion: _perfil!.descripcion,
-          fotoPerfilUrl: _perfil!.fotoPerfilUrl,
-          categoria: _perfil!.categoria,
-          movilidad: _perfil!.movilidad,
-          horarioInicio: _perfil!.horarioInicio,
-          horarioFin: _perfil!.horarioFin,
-          visible: nuevoEstado,
-          lat: _perfil!.lat,
-          lng: _perfil!.lng,
-        );
-      });
-
-      if (nuevoEstado) {
-        _publicarUbicacionActual();
-        _iniciarTracking();
-      } else {
-        _detenerTracking();
+        return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            nuevoEstado
-                ? 'Ahora eres visible en el mapa'
-                : 'Ya no apareces en el mapa',
+      setState(() => _toggling = true);
+
+      // Publicar ubicación primero
+      final ubicResp = await _ubicacionService.publicarUbicacion(
+        pos.latitude,
+        pos.longitude,
+      );
+
+      if (!ubicResp.success) {
+        if (!mounted) return;
+        setState(() => _toggling = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ubicResp.error ?? 'Error al publicar ubicación'),
+            backgroundColor: AppColors.error,
           ),
-          backgroundColor: nuevoEstado
-              ? AppColors.servicios
-              : AppColors.textSecondary,
-        ),
-      );
+        );
+        return;
+      }
+
+      // Luego cambiar estado a visible
+      final estadoResp = await _ubicacionService.cambiarEstado(true);
+
+      if (!mounted) return;
+      setState(() => _toggling = false);
+
+      if (estadoResp.success) {
+        setState(() {
+          _perfil = VendedorPerfilDTO(
+            id: _perfil!.id,
+            nombre: _perfil!.nombre,
+            nombreNegocio: _perfil!.nombreNegocio,
+            descripcion: _perfil!.descripcion,
+            fotoPerfilUrl: _perfil!.fotoPerfilUrl,
+            categoria: _perfil!.categoria,
+            movilidad: _perfil!.movilidad,
+            horarioInicio: _perfil!.horarioInicio,
+            horarioFin: _perfil!.horarioFin,
+            visible: true,
+            lat: pos.latitude,
+            lng: pos.longitude,
+          );
+        });
+        _iniciarTracking();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ahora eres visible en el mapa'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(estadoResp.error ?? 'Error al cambiar estado'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(resp.error ?? 'Error al cambiar estado'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      // Desactivar — más simple
+      setState(() => _toggling = true);
+      final resp = await _ubicacionService.cambiarEstado(false);
+
+      if (!mounted) return;
+      setState(() => _toggling = false);
+
+      if (resp.success) {
+        _detenerTracking();
+        setState(() {
+          _perfil = VendedorPerfilDTO(
+            id: _perfil!.id,
+            nombre: _perfil!.nombre,
+            nombreNegocio: _perfil!.nombreNegocio,
+            descripcion: _perfil!.descripcion,
+            fotoPerfilUrl: _perfil!.fotoPerfilUrl,
+            categoria: _perfil!.categoria,
+            movilidad: _perfil!.movilidad,
+            horarioInicio: _perfil!.horarioInicio,
+            horarioFin: _perfil!.horarioFin,
+            visible: false,
+            lat: _perfil!.lat,
+            lng: _perfil!.lng,
+          );
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ya no apareces en el mapa'),
+            backgroundColor: Color(0xFF6B7280),
+          ),
+        );
+      }
     }
   }
 
