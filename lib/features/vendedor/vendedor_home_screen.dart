@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:qatu_movil/features/catalogo/catalogo_screen.dart';
 import '../../../core/core.dart';
 import '../../../models/models.dart';
 import '../../services/Service.dart';
@@ -441,9 +442,11 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
                     label: 'Catálogo',
                     color: AppColors.electronica,
                     onTap: () {
-                      // TODO: Navigator.push → CatalogoScreen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Catálogo próximamente')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CatalogoScreen(),
+                        ),
                       );
                     },
                   ),

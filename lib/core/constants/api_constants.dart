@@ -16,7 +16,10 @@ class ApiConstants {
   static const String miUbicacion = '/vendedores/mi-ubicacion';
   static const String miEstado = '/vendedores/mi-estado';
   static const String miFcmToken = '/vendedores/mi-fcm-token';
-  static const String misProductos = '/productos/mis-productos';
+  // Productos
+  static const String productosVendedor = '/productos'; // GET /{id}/productos
+  static const String misProductos =
+      '/productos/mis-productos'; // POST, PUT, DELETE
   static const String misReportes = '/reportes/mis-reportes';
 
   // Sugerencias
@@ -31,7 +34,4 @@ class ApiConstants {
   static const String wsUbicaciones = '/topic/mapa/ubicaciones';
   static const String wsCongestion = '/topic/mapa/congestion';
   static const String wsZonas = '/topic/mapa/zonas';
-
-  //Productos
-  static const String productosVendedor = '/productos';
 }
