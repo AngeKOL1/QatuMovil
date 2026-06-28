@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qatu_movil/models/usuarioObservador.dart';
 import '../../../core/core.dart';
 import '../../services/Service.dart';
+import '../../shared/widgets/logout_dialog.dart';
 import '../auth/login/login_screen.dart';
 
 class ObservadorPerfilScreen extends StatefulWidget {
@@ -42,6 +43,9 @@ class _ObservadorPerfilScreenState extends State<ObservadorPerfilScreen> {
   }
 
   Future<void> _logout() async {
+    final confirmar = await mostrarLogoutDialog(context);
+    if (!confirmar) return;
+
     await _authService.logout();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(

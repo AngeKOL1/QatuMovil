@@ -7,6 +7,7 @@ import '../auth/login/login_screen.dart';
 import '../mapa/mapa_screen.dart';
 import '../sugerencias/sugerencias_screen.dart';
 import '../reportes/resportes_screen.dart';
+import '../../shared/widgets/logout_dialog.dart';
 
 class VendedorHomeScreen extends StatefulWidget {
   const VendedorHomeScreen({super.key});
@@ -194,6 +195,9 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
   }
 
   Future<void> _logout() async {
+    final confirmar = await mostrarLogoutDialog(context);
+    if (!confirmar) return;
+
     _detenerTracking();
     await _authService.logout();
     if (!mounted) return;

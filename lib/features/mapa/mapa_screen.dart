@@ -11,6 +11,7 @@ import '../observador/observador_perfil_screen.dart';
 import 'vendedor_perfil_sheet.dart';
 import 'widgets/ruta_layer.dart';
 import 'widgets/sugerencia_banner.dart';
+import '../../shared/widgets/logout_dialog.dart';
 
 const _cajamarcaLat = -7.1617;
 const _cajamarcaLng = -78.5127;
@@ -272,6 +273,9 @@ class _MapaScreenState extends State<MapaScreen> {
   }
 
   Future<void> _logout() async {
+    final confirmar = await mostrarLogoutDialog(context);
+    if (!confirmar) return;
+
     await _authService.logout();
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
