@@ -33,11 +33,41 @@ class _VendedorHomeScreenState extends State<VendedorHomeScreen> {
   void initState() {
     super.initState();
     _cargarPerfil();
+    _configurarFcm();
+  }
+
+  void _configurarFcm() {
+    FcmHandler.instance.onRutaSugerida = (lat, lng) {
+      if (!mounted) return;
+      // Navegar al mapa y pasar las coordenadas de destino
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MapaScreen(
+            key: UniqueKey(),
+            rutaDestinoLat: lat,
+            rutaDestinoLng: lng,
+          ),
+        ),
+      );
+    };
+
+    FcmHandler.instance.onSugerenciaReasignacion = () {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tienes una nueva sugerencia de reubicación'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    };
   }
 
   @override
   void dispose() {
     _gpsSubscription?.cancel();
+    FcmHandler.instance.onRutaSugerida = null; // ← agregar
+    FcmHandler.instance.onSugerenciaReasignacion = null; // ← agregar
     super.dispose();
   }
 

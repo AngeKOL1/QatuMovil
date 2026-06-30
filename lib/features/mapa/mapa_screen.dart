@@ -17,7 +17,10 @@ const _cajamarcaLat = -7.1617;
 const _cajamarcaLng = -78.5127;
 
 class MapaScreen extends StatefulWidget {
-  MapaScreen({super.key});
+  final double? rutaDestinoLat;
+  final double? rutaDestinoLng;
+
+  MapaScreen({super.key, this.rutaDestinoLat, this.rutaDestinoLng});
 
   @override
   State<MapaScreen> createState() => _MapaScreenState();
@@ -73,6 +76,12 @@ class _MapaScreenState extends State<MapaScreen> {
     _conectarWebSocket();
     _configurarFcm();
     _iniciarAutoRefresh();
+
+    if (widget.rutaDestinoLat != null && widget.rutaDestinoLng != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _mostrarRutaSugerida(widget.rutaDestinoLat!, widget.rutaDestinoLng!);
+      });
+    }
   }
 
   void _iniciarAutoRefresh() {

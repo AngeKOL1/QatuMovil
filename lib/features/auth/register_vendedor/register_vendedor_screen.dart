@@ -65,6 +65,7 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
       _nombreCtrl,
       _emailCtrl,
       _passCtrl,
+      _confirmPassCtrl,
       _dniCtrl,
       _telefonoCtrl,
       _descCtrl,
@@ -101,7 +102,6 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
     setState(() => _loading = false);
 
     if (resp.success) {
-      // Auto-login después de registrarse
       final loginResp = await _authService.login(
         LoginRequest(email: _emailCtrl.text.trim(), password: _passCtrl.text),
       );
@@ -120,7 +120,6 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
           (_) => false,
         );
       } else {
-        // Si el auto-login falla, ir al login normal
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cuenta creada. Inicia sesión')),
         );
@@ -129,6 +128,8 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
           (_) => false,
         );
       }
+    } else {
+      setState(() => _error = resp.error ?? 'Error al crear la cuenta');
     }
   }
 
@@ -154,13 +155,20 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
                 'Correo',
                 Icons.email_outlined,
                 type: TextInputType.emailAddress,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Campo requerido';
+                  final emailRegex = RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  );
+                  if (!emailRegex.hasMatch(v.trim())) return 'Correo no válido';
+                  return null;
+                },
               ),
               _field(
                 _passCtrl,
                 'Contraseña',
                 Icons.lock_outline,
                 obscure: true,
-                // Validación contraseña — mínimo 8 no 6
                 validator: (v) =>
                     (v?.length ?? 0) < 8 ? 'Mínimo 8 caracteres' : null,
               ),
@@ -169,24 +177,38 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
                 'Confirmar contraseña',
                 Icons.lock_outline,
                 obscure: true,
-                // Validación contraseña — mínimo 8 no 6
-                validator: (v) =>
-                    (v?.length ?? 0) < 8 ? 'Mínimo 8 caracteres' : null,
+                validator: (v) {
+                  if ((v?.length ?? 0) < 8) return 'Mínimo 8 caracteres';
+                  if (v != _passCtrl.text)
+                    return 'Las contraseñas no coinciden';
+                  return null;
+                },
               ),
               _field(
                 _dniCtrl,
                 'DNI (8 dígitos)',
                 Icons.badge_outlined,
                 type: TextInputType.number,
-                validator: (v) => v?.length != 8 ? 'DNI de 8 dígitos' : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Campo requerido';
+                  if (v.trim().length != 8 || int.tryParse(v.trim()) == null) {
+                    return 'DNI válido de 8 dígitos';
+                  }
+                  return null;
+                },
               ),
               _field(
                 _telefonoCtrl,
                 'Teléfono',
                 Icons.phone_outlined,
                 type: TextInputType.phone,
-                validator: (v) =>
-                    v?.length != 9 ? 'Teléfono de 9 dígitos' : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Campo requerido';
+                  if (v.trim().length != 9 || int.tryParse(v.trim()) == null) {
+                    return 'Teléfono de 9 dígitos';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               _sectionTitle('Información del negocio'),
@@ -286,6 +308,7 @@ class _RegisterVendedorScreenState extends State<RegisterVendedorScreen> {
     );
   }
 
+  //  CORREGIDO: Estos métodos ahora están correctamente posicionados dentro de la clase State
   Widget _sectionTitle(String title) => Padding(
     padding: const EdgeInsets.only(bottom: 12),
     child: Text(

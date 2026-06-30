@@ -40,7 +40,7 @@ class AuthService {
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     } catch (e) {
-      return ApiResponse.failure('Error inseperado: $e');
+      return ApiResponse.failure('Error inesperado: $e');
     }
   }
 
@@ -56,7 +56,7 @@ class AuthService {
     } on DioException catch (e) {
       return ApiResponse.failure(_client.handleError(e).message);
     } catch (e) {
-      return ApiResponse.failure('Error inseperado: $e');
+      return ApiResponse.failure('Error inesperado: $e');
     }
   }
 

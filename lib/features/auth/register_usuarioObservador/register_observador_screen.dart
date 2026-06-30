@@ -91,6 +91,8 @@ class _RegisterObservadorScreenState extends State<RegisterObservadorScreen> {
           (_) => false,
         );
       }
+    } else {
+      setState(() => _error = resp.error ?? 'Error al crear la cuenta');
     }
   }
 

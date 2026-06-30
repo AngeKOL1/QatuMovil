@@ -28,7 +28,7 @@ class ApiConstants {
   // Mapa
   static const String mapaVendedores = '/mapa/vendedores';
   static const String mapaHeatmap = '/mapa/heatmap';
-  static const String mapaZonas = '/mapa/zonas';
+  static const String mapaZonas = '/zonas/mapa';
 
   // WebSocket topics
   static const String wsUbicaciones = '/topic/mapa/ubicaciones';
